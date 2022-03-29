@@ -1,0 +1,44 @@
+# one-level-NAS.run
+
+model "one-level-NAS.mod";
+data "Ins_cos_1_1_0.75_v1.dat";
+option solver baron;
+#option solver gurobi;
+#option gurobi_options "dualreductions=0 iisfind=1";
+option baron_options "maxtime=-1";
+#option gurobi_options "nonconvex=2";
+solve;
+
+display nnerr,A,b,v_plus,v_minus,z;
+#display nnerr,A,b;
+#display input_x1_upper.slack,input_x1_lower.slack,input_x2_upper.slack,input_x2_lower.slack;
+#display hidden_pre_upper.slack,hidden_pre_lower.slack,output_upper.slack,output_lower.slack;
+param version_run := 1;
+param dim := 2;
+printf "x1\tx2\tf\tf_est\tquad_error\n" > ("res_NAS_" & dim & "_" & n1 & "_" & n2 & ".dat");
+
+param f_est;
+param quad_error;
+for{s1 in T_1}{
+	for{s2 in T_2}{
+		let f_est := v_plus[s1,s2,nI+nH+nO] - v_minus[s1,s2,nI+nH+nO];
+		let quad_error := (f_est-f[s1,s2])^2;
+		printf "%f\t%f\t%f\t%f\t%f\n",x1[s1],x2[s2],f[s1,s2],f_est,quad_error >> ("res_NAS_" & dim & "_" & n1 & "_" & n2 & ".dat");
+	}
+}
+
+
+## saving the model ##
+
+printf "i\tj\tAij\n" > ("A_NAS_" & dim & "_" & n1 & "_" & n2 & ".dat");
+
+for{(i,j) in G}{
+	printf "%i\t%i\t%f\n",i,j,A[i,j] >> ("A_NAS_" & dim & "_" & n1 & "_" & n2 & ".dat");
+}
+
+printf "i\tbi\n" > ("b_NAS_" & dim & "_" & n1 & "_" & n2 & ".dat");
+
+for{i in V diff I}{
+	printf "%i\t%f\n",i,b[i] >> ("b_NAS_" & dim & "_" & n1 & "_" & n2 & ".dat");
+}
+

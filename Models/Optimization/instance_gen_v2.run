@@ -1,0 +1,64 @@
+# instance_gen.run
+param version := 1;
+
+param m1 default 1;
+param m2 default 1;
+param ratio := 0.75;
+param outputFile := "Ins_cos_" & m1 & "_" & m2 & "_" & ratio & "_v" & version & ".dat";
+printf "#File created by Instance_gen.run version %i\n\n",version > ("Ins_cos_" & m1 & "_" & m2 & "_" & ratio & "_v" & version & ".dat");
+
+# generating the regularization parameter
+param lambda := 0.001;
+printf "param lambda := %f;\n",lambda >> ("Ins_cos_" & m1 & "_" & m2 & "_" & ratio & "_v" & version & ".dat");
+
+# generating the variable ranges
+param x1_U := 1;
+param x1_L := -1;
+param x2_U := 1;
+param x2_L := -1;
+printf "param x1_U := %f;\nparam x1_L := %f;\nparam x2_U := %f;\nparam x2_L := %f;\n\n",x1_U,x1_L,x2_U,x2_L >> ("Ins_cos_" & m1 & "_" & m2 & "_" & ratio & "_v" & version & ".dat");
+
+## generating the training set (s_x1,s_x2,x1,x2,f(x1,x2))
+# sets of input indices
+param n1 := 25;
+param n2 := 25;
+param nt1 := round(sqrt(n1*n2*ratio)*n1/n2);   # n training
+param nt2 := round(sqrt(n1*n2*ratio)*n2/n1);
+param nv1 := n1 - nt1;   					   # n validation
+param nv2 := n2 - nt2;
+printf "param n1 := %i;\nparam n2 := %i;\n\n",n1,n2 >> ("Ins_cos_" & m1 & "_" & m2 & "_" & ratio & "_v" & version & ".dat");
+printf "param nt1 := %i;\nparam nt2 := %i;\n\n",nt1,nt2 >> ("Ins_cos_" & m1 & "_" & m2 & "_" & ratio & "_v" & version & ".dat");
+
+param x1_i;
+param x2_i;
+printf "param : x1 :=\n" >> ("Ins_cos_" & m1 & "_" & m2 & "_" & ratio & "_v" & version & ".dat");
+for{i_x1 in 1..n1}{
+	let x1_i := x1_L + (x1_U - x1_L)*(i_x1-1)/(n1-1);
+	printf "%i\t%f\n",i_x1,x1_i >> ("Ins_cos_" & m1 & "_" & m2 & "_" & ratio & "_v" & version & ".dat");
+}
+printf ";\n\n" >> ("Ins_cos_" & m1 & "_" & m2 & "_" & ratio & "_v" & version & ".dat");
+printf "param : x2 :=\n" >> ("Ins_cos_" & m1 & "_" & m2 & "_" & ratio & "_v" & version & ".dat");
+for{i_x2 in 1..n2}{
+	let x2_i := x2_L + (x2_U - x2_L)*(i_x2-1)/(n2-1);
+	printf "%i\t%f\n",i_x2,x2_i >> ("Ins_cos_" & m1 & "_" & m2 & "_" & ratio & "_v" & version & ".dat");
+}
+printf ";\n\n" >> ("Ins_cos_" & m1 & "_" & m2 & "_" & ratio & "_v" & version & ".dat");
+
+# 10000 points in the region [-1,1]x[-1,1]
+printf "param : f :=\n" >> ("Ins_cos_" & m1 & "_" & m2 & "_" & ratio & "_v" & version & ".dat");
+param f_i;  # f(x1_i,x2_i)
+for{i_x1 in 1..n1}{
+	let x1_i := x1_L + (x1_U - x1_L)*(i_x1-1)/(n1-1);
+	for{i_x2 in 1..n2}{
+		let x2_i := x2_L + (x2_U - x2_L)*(i_x2-1)/(n2-1);
+		let f_i := cos(m1*x1_i)*cos(m2*x2_i);
+		printf "%i\t%i\t%f\n",i_x1,i_x2,f_i >> ("Ins_cos_" & m1 & "_" & m2 & "_" & ratio & "_v" & version & ".dat");
+	}
+}
+
+printf ";\n\n" >> ("Ins_cos_" & m1 & "_" & m2 & "_" & ratio & "_v" & version & ".dat");
+
+param nI default 2; # number of input nodes
+param nH default 6; # number of hidden nodes
+param nO default 1; # number of output nodes
+printf "param nI := %i;\nparam nH := %i;\nparam nO := %i;\n\n",nI,nH,nO >> ("Ins_cos_" & m1 & "_" & m2 & "_" & ratio & "_v" & version & ".dat");
